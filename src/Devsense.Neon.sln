@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Devsense.Neon", "Devsense.Neon\Devsense.Neon.csproj", "{7CC30D08-6040-4336-BC6E-91C88E45B4C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A54EAF11-D64A-4E93-9686-A77A4B5B9496}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Devsense.Neon.Tests", "..\tests\Devsense.Neon.Tests\Devsense.Neon.Tests.csproj", "{462F3D58-D5F6-435B-9BD0-5135BF5F2E5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CC30D08-6040-4336-BC6E-91C88E45B4C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CC30D08-6040-4336-BC6E-91C88E45B4C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CC30D08-6040-4336-BC6E-91C88E45B4C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CC30D08-6040-4336-BC6E-91C88E45B4C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462F3D58-D5F6-435B-9BD0-5135BF5F2E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462F3D58-D5F6-435B-9BD0-5135BF5F2E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462F3D58-D5F6-435B-9BD0-5135BF5F2E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462F3D58-D5F6-435B-9BD0-5135BF5F2E5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {81976A3D-617C-400D-9337-DE41C5F50F9A}
+	EndGlobalSection
+EndGlobal
