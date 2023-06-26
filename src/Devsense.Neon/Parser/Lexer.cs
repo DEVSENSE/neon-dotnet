@@ -177,7 +177,14 @@ namespace Devsense.Neon.Parser
                 }
 
                 // Punctuation
-                if (",:=[]{}()-".IndexOf(source[0]) >= 0)
+                if (",=[]{}()".IndexOf(source[0]) >= 0)
+                {
+                    return Consume(1, NeonTokens.Char);
+                }
+
+                // :<ws>
+                // -<ws>
+                if ((source[0] == '-' || source[0] == ':') && source.Length >= 2 && char.IsWhiteSpace(source[1]))
                 {
                     return Consume(1, NeonTokens.Char);
                 }
@@ -206,7 +213,7 @@ namespace Devsense.Neon.Parser
                     {
                         c = source[n];
 
-                        if (c == Hash || IsNewLine(c) || c == '(')
+                        if (c == Hash || IsNewLine(c) || c == '(' || c == ',' || c == '=')
                         {
                             break;
                         }

@@ -63,6 +63,10 @@ namespace Devsense.Neon.Parser
             return fetch;
         }
 
+        public bool ConsumeNewLine() => Consume(NeonTokens.Newline, out _);
+
+        public bool Consume(char ch) => Consume(ch, out _);
+
         public bool Consume(char ch, out Token token)
         {
             token = Fetch();
@@ -84,6 +88,7 @@ namespace Devsense.Neon.Parser
             if (token.Type == type)
             {
                 fetch = default;
+                Fetch(); // fetch new indent
                 return true;
             }
 
