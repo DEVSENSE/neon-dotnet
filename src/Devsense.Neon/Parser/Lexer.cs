@@ -277,7 +277,7 @@ namespace Devsense.Neon.Parser
                     {
                         c = source[n];
 
-                        if (c == Hash || IsNewLine(c) || c == '(' || c == ',' || c == '=')
+                        if (c == Hash || IsNewLine(c) || c == '(' || c == ',' || c == '=' || c == ')' || c == '}' || c == ']')
                         {
                             break;
                         }

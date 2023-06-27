@@ -11,7 +11,7 @@ namespace Devsense.Neon.Parser
         {
             var source = new Tokenizer(new Lexer(content));
 
-            while (source.Consume(NeonTokens.Newline, out _)) ;
+            while (source.ConsumeNewLine()) ;
 
             var value = ParseBlock(ref source, source.indent);
 
@@ -117,7 +117,7 @@ namespace Devsense.Neon.Parser
             }
             else if (source.Consume(NeonTokens.Literal, out var literal))
             {
-                value = LiteralFactory.Create(literal.Value);
+                value = LiteralFactory.Create(literal.Value.Trim());
             }
             else if (source.Fetch().Type == NeonTokens.Newline)
             {
