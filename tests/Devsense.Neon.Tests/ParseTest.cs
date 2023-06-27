@@ -34,6 +34,18 @@ multi line string: '''
 	second line
 	third line
 '''
+
+
+special types:
+	escape sequences: ""\u2026 \t \n \r \f \b""
+	bool: [true, false]
+	bool alternative: [yes, no]
+	exponent number: +0123.45e6
+	hex number: 0xAB01
+	octal number: 0o666
+	binary number: 0b11100111
+	date: 2020-02-02
+	date time: 2020-02-02 12:34:56
 ")]
         public void Parse(string neonContent)
         {
