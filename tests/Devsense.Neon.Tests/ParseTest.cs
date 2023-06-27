@@ -24,6 +24,16 @@ children:
 	- Bart
 	- Lisa
 	- Maggie
+
+entity: Column(type=int, nulls=yes)
+
+string: 'quotes string'
+
+multi line string: '''
+	one line
+	second line
+	third line
+'''
 ")]
         public void Parse(string neonContent)
         {

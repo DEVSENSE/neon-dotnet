@@ -187,6 +187,80 @@ namespace Devsense.Neon.Parser
             return false;
         }
 
+        static bool TryConsumeTrippleQuotedString(ReadOnlySpan<char> source, out int charsCount, out string? value)
+        {
+            charsCount = -1;
+            value = null;
+
+            //
+            Debug.Assert(source.Length >= 3);
+
+            var quote = source[0];
+            Debug.Assert(quote == '"' || quote == '\'');
+            Debug.Assert(quote == source[1]);
+            Debug.Assert(quote == source[2]);
+
+            var closing = quote == '\"' ? "\"\"\"" : "'''";
+
+            int n = 3;
+
+            if (TryConsumeNewLine(source.Slice(3), out var newline))
+            {
+                n += newline;
+            }
+            else
+            {
+                // unexpected
+                return false;
+            }
+
+            var sb = new StringBuilder();
+
+            while (n < source.Length)
+            {
+                var c = source[n];
+
+                if (TryConsumeNewLine(source.Slice(n), out newline))
+                {
+                    // \n\s*'''\s*\n
+                    int end = n + newline;
+                    TryConsumeWhitespace(source.Slice(end), out var ws); end += ws; // \s*
+                    if (source.Slice(end).StartsWith(closing.AsSpan(), StringComparison.Ordinal)) // '''
+                    {
+                        end += closing.Length;
+                        TryConsumeWhitespace(source.Slice(end), out ws); end += ws; // \s*
+                        if (end == source.Length || TryConsumeNewLine(source.Slice(end), out _))
+                        {
+                            charsCount = n + newline + closing.Length;
+                            value = sb.ToString();
+                            return true;
+                        }
+                    }
+
+                    // \n
+                    sb.Append('\n');
+                    n += newline;
+                    continue;
+                }
+                else if (c == '\\' && quote == '\"' && n + 1 < source.Length)
+                {
+                    // consume escaped sequence:
+                    if (ConsumeEscapedSequence(source.Slice(n), sb, out charsCount))
+                    {
+                        n += charsCount;
+                        continue;
+                    }
+                }
+
+                // continue
+                n++;
+                sb.Append(c);
+            }
+
+            //
+            return false;
+        }
+
         public ref struct TokenEnumerator
         {
             /// <summary>
@@ -258,11 +332,13 @@ namespace Devsense.Neon.Parser
                 {
                     // string
 
-                    if (source.Length >= 3 && source[1] == c && source[2] == c) // """, '''
+                    if (source.Length >= 4 && source[1] == c && source[2] == c && IsNewLine(source[3])) // (""" | ''') \n
                     {
                         // tripple quotes
-                        // TODO
-                        throw new NotImplementedException();
+                        if (TryConsumeTrippleQuotedString(source, out n, out var value))
+                        {
+                            return Consume(n, NeonTokens.String, value: value);
+                        }
                     }
                     else if (TryConsumeQuotedString(source, out n, out var value))
                     {
