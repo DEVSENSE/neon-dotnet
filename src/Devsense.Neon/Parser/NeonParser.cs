@@ -45,6 +45,11 @@ namespace Devsense.Neon.Parser
                     break;
                 }
 
+                if (source.ConsumeNewLine())
+                {
+                    continue;
+                }
+
                 if (source.Consume('-'))
                 {
                     // list
@@ -66,7 +71,8 @@ namespace Devsense.Neon.Parser
                             }
                             else
                             {
-                                break;
+                                items.Add(new(key, LiteralFactory.Null()));
+                                continue;
                             }
                         }
                         else

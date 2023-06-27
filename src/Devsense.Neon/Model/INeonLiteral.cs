@@ -49,7 +49,7 @@ namespace Devsense.Neon.Model
                 if (literal.Equals("false".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
                     literal.Equals("no".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Literal<bool>(true);
+                    return new Literal<bool>(false);
                 }
             }
 
