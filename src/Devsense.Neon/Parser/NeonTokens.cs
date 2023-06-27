@@ -25,7 +25,7 @@ namespace Devsense.Neon.Parser
     //    public static bool IsNewLine(char c) => c == '\n' || c == '\r';
     //}
 
-    public enum NeonTokens
+    enum NeonTokens
     {
         EOF = 0,
 

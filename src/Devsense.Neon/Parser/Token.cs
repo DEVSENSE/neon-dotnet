@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Devsense.Neon.Parser
 {
-    public ref struct Token
+    ref struct Token
     {
         public ReadOnlySpan<char> Value { get; }
 
