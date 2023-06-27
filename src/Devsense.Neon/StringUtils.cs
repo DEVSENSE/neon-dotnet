@@ -44,5 +44,14 @@ namespace Devsense.Neon
 
             return true;
         }
+
+        public static char ClosingBrace(char opening) => opening switch
+        {
+            '(' => ')',
+            '[' => ']',
+            '<' => '>',
+            '{' => '}',
+            _ => throw new ArgumentException()
+        };
     }
 }

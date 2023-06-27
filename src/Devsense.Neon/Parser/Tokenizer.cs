@@ -71,7 +71,7 @@ namespace Devsense.Neon.Parser
         {
             token = Fetch();
 
-            if (token.IsChar(out var actual) && actual == ch)
+            if (token.Is(ch))
             {
                 fetch = default;
                 return true;

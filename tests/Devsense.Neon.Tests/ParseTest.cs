@@ -8,8 +8,9 @@ namespace Devsense.Neon.Tests
     {
         [Theory]
         [InlineData(@"
-Person:
+person:
 	name: Homer  	  # this is a comment
+	hasHair: No
 
 address:
 	street: 742 Evergreen Terrace

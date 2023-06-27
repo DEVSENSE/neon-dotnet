@@ -17,17 +17,26 @@ namespace Devsense.Neon.Visitor
 
         }
 
-        public virtual void Visit(INeonArray value)
+        protected virtual void Visit(KeyValuePair<INeonValue, INeonValue>[] pairs)
         {
-            var items = value.Values;
-            if (items != null)
+            if (pairs != null)
             {
-                for (int i = 0; i < items.Length; i++)
+                for (int i = 0; i < pairs.Length; i++)
                 {
-                    Visit(items[i].Key);
-                    Visit(items[i].Value);
+                    Visit(pairs[i].Key);
+                    Visit(pairs[i].Value);
                 }
             }
+        }
+
+        public virtual void Visit(INeonArray value)
+        {
+            Visit(value.Values);
+        }
+
+        public virtual void Visit(INeonEntity value)
+        {
+            Visit(value.Attributes);
         }
     }
 }

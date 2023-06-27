@@ -97,6 +97,10 @@ namespace Devsense.Neon.Parser
                 {
                     continue;
                 }
+                else
+                {
+                    break;
+                }
             }
 
             //
@@ -122,8 +126,7 @@ namespace Devsense.Neon.Parser
             }
             else if (source.Consume('[', out var c) || source.Consume('{', out c) || source.Consume('(', out c))
             {
-                // TODO
-                throw new NotImplementedException();
+                return new Block(ParseBraces(ref source, StringUtils.ClosingBrace(c.Value[0])));
             }
             else
             {
@@ -133,11 +136,62 @@ namespace Devsense.Neon.Parser
             // ( entity arguments )
             if (source.Consume('('))
             {
-                // TODO
+                value = new Entity(value, ParseBraces(ref source, ')'));
+
+                // TODO: chained entity
             }
 
             //
             return value;
+        }
+
+        static KeyValuePair<INeonValue, INeonValue>[] ParseBraces(ref Tokenizer source, char closing)
+        {
+            var items = new List<KeyValuePair<INeonValue, INeonValue>>();
+
+            for (; ; )
+            {
+                while (source.ConsumeNewLine()) ;
+
+                // )
+                if (source.Consume(closing))
+                {
+                    break;
+                }
+
+                // key: value?
+                var value = ParseValue(ref source);
+
+                if (source.Consume(':') || source.Consume('='))
+                {
+                    if (source.Consume(',') || source.Fetch().Is(closing))
+                    {
+                        // key: <null>,
+                        items.Add(new(value, LiteralFactory.Null()));
+                        continue;
+                    }
+
+                    // key: value
+                    items.Add(new(value, ParseValue(ref source)));
+                }
+
+                // ,
+                if (source.Consume(','))
+                {
+                    continue;
+                }
+
+                // )
+                if (source.Consume(closing))
+                {
+                    break;
+                }
+
+                //
+                throw new NeonParseException("unexpected", source.line);
+            }
+
+            return items.ToArray();
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Devsense.Neon.Parser
 
         public int Line { get; }
 
+        public bool Is(char c) => Type == NeonTokens.Char && Value.Length == 1 && Value[0] == c;
+
         public bool IsChar(out char c)
         {
             if (Type == NeonTokens.Char && Value.Length == 1)
