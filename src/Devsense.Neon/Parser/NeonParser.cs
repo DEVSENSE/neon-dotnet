@@ -21,7 +21,7 @@ namespace Devsense.Neon.Parser
             }
             else
             {
-                throw new NeonParseException("Unexpected", source.line);
+                throw source.Unexpected();
             }
         }
 
@@ -136,7 +136,7 @@ namespace Devsense.Neon.Parser
             }
             else
             {
-                throw new NeonParseException("Unexpected", source.line);
+                throw source.Unexpected();
             }
 
             if (source.Fetch().Is('('))
@@ -206,7 +206,7 @@ namespace Devsense.Neon.Parser
                 }
 
                 //
-                throw new NeonParseException("unexpected", source.line);
+                throw source.Unexpected();
             }
 
             return items.ToArray();

@@ -14,6 +14,8 @@ namespace Devsense.Neon.Parser
 
         public int line => tokens.Line;
 
+        public Exception Unexpected() => new NeonParseException("Unexpected", this.line);
+
         public Tokenizer(Lexer lexer)
         {
             this.tokens = lexer.GetEnumerator();
