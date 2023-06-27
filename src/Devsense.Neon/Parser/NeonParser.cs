@@ -139,16 +139,28 @@ namespace Devsense.Neon.Parser
                 throw new NeonParseException("Unexpected", source.line);
             }
 
-            // ( entity arguments )
-            if (source.Consume('('))
+            if (source.Fetch().Is('('))
             {
-                value = new Entity(value, ParseBraces(ref source, ')'));
-
-                // TODO: chained entity
+                value = ParseEntityArguments(ref source, value);
             }
 
             //
             return value;
+        }
+
+        static INeonEntity ParseEntityArguments(ref Tokenizer source, INeonValue value)
+        {
+            var entity = source.Consume('(')
+                ? new Entity(value, ParseBraces(ref source, ')'))
+                : new Entity(value);
+              
+            // chained entity?
+            if (source.Consume(NeonTokens.Literal, out var entityLit))
+            {
+                entity.Next = ParseEntityArguments(ref source, LiteralFactory.Create(entityLit.Value));
+            }
+
+            return entity;
         }
 
         static KeyValuePair<INeonValue, INeonValue>[] ParseBraces(ref Tokenizer source, char closing)

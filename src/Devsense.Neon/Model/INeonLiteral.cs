@@ -8,7 +8,7 @@ using Devsense.Neon.Visitor;
 namespace Devsense.Neon.Model
 {
     /// <summary>
-    /// A lIteral value: string, number, boolean, date, datetime.
+    /// A literal value: string, number, boolean, date, datetime.
     /// </summary>
     public interface INeonLiteral : INeonValue
     {

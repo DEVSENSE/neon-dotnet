@@ -7,7 +7,7 @@ namespace Devsense.Neon.Visitor
 {
     public class NeonValueVisitor
     {
-        public virtual void Visit(INeonValue value)
+        public virtual void Visit(INeonValue? value)
         {
             value?.Visit(this);
         }
@@ -37,6 +37,7 @@ namespace Devsense.Neon.Visitor
         public virtual void Visit(INeonEntity value)
         {
             Visit(value.Attributes);
+            Visit((INeonValue?)value.Next);
         }
     }
 }

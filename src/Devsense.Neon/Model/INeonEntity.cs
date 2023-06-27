@@ -13,6 +13,8 @@ namespace Devsense.Neon.Model
         INeonValue Value { get; }
 
         KeyValuePair<INeonValue, INeonValue>[] Attributes { get; }
+
+        INeonEntity? Next { get; }
     }
 
     class Entity : INeonEntity
@@ -21,10 +23,13 @@ namespace Devsense.Neon.Model
 
         public KeyValuePair<INeonValue, INeonValue>[] Attributes { get; }
 
-        public Entity(INeonValue value, KeyValuePair<INeonValue, INeonValue>[] attributes)
+        public INeonEntity? Next { get; set; }
+
+        public Entity(INeonValue value, KeyValuePair<INeonValue, INeonValue>[]? attributes = null)
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
-            Attributes = attributes ?? throw new ArgumentNullException(nameof(attributes));
+            Attributes = attributes ?? new KeyValuePair<INeonValue, INeonValue>[0];
+            Next = null;
         }
 
         public void Visit(NeonValueVisitor visitor) => visitor.Visit(this);
