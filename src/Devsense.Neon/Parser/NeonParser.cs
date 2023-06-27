@@ -13,7 +13,16 @@ namespace Devsense.Neon.Parser
 
             while (source.Consume(NeonTokens.Newline, out _)) ;
 
-            return ParseBlock(ref source, source.indent);
+            var value = ParseBlock(ref source, source.indent);
+
+            if (source.Consume(NeonTokens.EOF, out _))
+            {
+                return value;
+            }
+            else
+            {
+                throw new NeonParseException("Unexpected", source.line);
+            }
         }
 
         // parse content on new line after ':'
@@ -105,6 +114,11 @@ namespace Devsense.Neon.Parser
             else if (source.Consume(NeonTokens.Literal, out var literal))
             {
                 value = LiteralFactory.Create(literal.Value);
+            }
+            else if (source.Fetch().Type == NeonTokens.Newline)
+            {
+                // no value is null
+                return LiteralFactory.Null();
             }
             else if (source.Consume('[', out var c) || source.Consume('{', out c) || source.Consume('(', out c))
             {

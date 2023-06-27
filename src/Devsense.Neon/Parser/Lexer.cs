@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 
 namespace Devsense.Neon.Parser
 {
@@ -37,6 +39,20 @@ namespace Devsense.Neon.Parser
         static bool IsNewLine(char c) => c == '\n' || c == '\r';
 
         static char Hash => '#';
+
+        // \t \n \r \f \b \" \\ \/ \_
+        static readonly Dictionary<char, char> s_escapedChars = new Dictionary<char, char>()
+        {
+            { 't', '\t' },
+            { 'n', '\n' },
+            { 'r', '\r' },
+            { 'f', '\f' },
+            { 'b', '\b' },
+            { '"', '"' },
+            { '\\', '\\' },
+            { '/', '/' },
+            { '_', '\u00A0' },
+        };
 
         static bool TryConsumeWhitespace(ReadOnlySpan<char> source, out int charsCount)
         {
@@ -81,7 +97,51 @@ namespace Devsense.Neon.Parser
             return false;
         }
 
-        static bool TryConsumeQuotedString(ReadOnlySpan<char> source, out int charsCount)
+        static char ConsumeUtfCodePoint(ReadOnlySpan<char> codepoint)
+        {
+            int num = 0;
+            foreach (var c in codepoint)
+            {
+                var digit =
+                    (c >= '0' && c <= '9') ? c - '0' :
+                    (c >= 'A' && c <= 'F') ? c - 'A' + 10 :
+                    (c >= 'a' && c <= 'f') ? c - 'a' + 10 :
+                    0;
+
+                num = num * 16 + digit;
+            }
+
+            return (char)num;
+        }
+
+        static bool ConsumeEscapedSequence(ReadOnlySpan<char> source, StringBuilder result, out int charsCount)
+        {
+            Debug.Assert(source.Length != 0);
+            
+            if (source.Length >= 2 && source[0] == '\\')
+            {
+                // \t \n \r \f \b \" \\ \/ \_
+                // \u00A9
+                if (s_escapedChars.TryGetValue(source[1], out var unescaped))
+                {
+                    charsCount = 2;
+                    result.Append(unescaped);
+                    return true;
+                }
+                else if (source[1] == 'u' && source.Length >= 6)
+                {
+                    charsCount = 2 + 4; // \uFFFF
+                    result.Append(ConsumeUtfCodePoint(source.Slice(2, 4)));
+                    return true;
+                }
+            }
+
+            //
+            charsCount = 0;
+            return false;
+        }
+
+        static bool TryConsumeQuotedString(ReadOnlySpan<char> source, out int charsCount, out string? value)
         {
             Debug.Assert(source.Length != 0);
 
@@ -89,7 +149,7 @@ namespace Devsense.Neon.Parser
             Debug.Assert(quote == '"' || quote == '\'');
 
             int n = 1;
-            bool escaped = false;
+            var sb = new StringBuilder();
 
             while (n < source.Length)
             {
@@ -99,27 +159,31 @@ namespace Devsense.Neon.Parser
                 {
                     break;
                 }
-                else if (escaped)
+                else if (c == '\\' && quote == '\"' && n + 1 < source.Length)
                 {
-                    escaped = false;
-                }
-                else if (c == '\\' && quote == '\"')
-                {
-                    escaped = true;
+                    // consume escaped sequence:
+                    if (ConsumeEscapedSequence(source.Slice(n), sb, out charsCount))
+                    {
+                        n += charsCount;
+                        continue;
+                    }
                 }
                 else if (c == quote)
                 {
                     // done
                     charsCount = n + 1;
+                    value = sb.ToString();
                     return true;
                 }
 
                 // continue
                 n++;
+                sb.Append(c);
             }
 
             //
             charsCount = -1;
+            value = null;
             return false;
         }
 
@@ -140,11 +204,11 @@ namespace Devsense.Neon.Parser
 
             public Token Current { get; private set; }
 
-            bool Consume(int nchars, NeonTokens type)
+            bool Consume(int nchars, NeonTokens type, string? value = null)
             {
                 Debug.Assert(nchars >= 0);
 
-                Current = new Token(source.Slice(0, nchars), type, Line);
+                Current = new Token(value != null ? value.AsSpan() : source.Slice(0, nchars), type, Line);
                 source = source.Slice(nchars);
                 return nchars > 0;
             }
@@ -200,9 +264,9 @@ namespace Devsense.Neon.Parser
                         // TODO
                         throw new NotImplementedException();
                     }
-                    else if (TryConsumeQuotedString(source, out n))
+                    else if (TryConsumeQuotedString(source, out n, out var value))
                     {
-                        return Consume(n, NeonTokens.String);
+                        return Consume(n, NeonTokens.String, value: value);
                     }
                 }
                 else // anything else
