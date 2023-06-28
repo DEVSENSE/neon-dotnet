@@ -47,6 +47,21 @@ special types:
 	date: 2020-02-02
 	date time: 2020-02-02 12:34:56
 ")]
+		[InlineData(@"
+includes:
+    - phpstan.neon.dist
+
+parameters:
+    typeAliases:
+        Name: 'string'
+        NameResolver: 'callable(): string'
+        NameOrResolver: 'Name|NameResolver'
+
+    ignoreErrors:
+        - '#Function pcntl_open not found\.#'
+    parallel:
+        maximumNumberOfProcesses: 1
+")]
         public void Parse(string neonContent)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());

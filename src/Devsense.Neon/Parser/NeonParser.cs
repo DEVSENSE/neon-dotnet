@@ -50,6 +50,8 @@ namespace Devsense.Neon.Parser
                     continue;
                 }
 
+                var nlconsumed = false;
+
                 if (source.Consume('-'))
                 {
                     // list
@@ -68,6 +70,7 @@ namespace Devsense.Neon.Parser
                             if (newindent.StartsWith(baseindent))
                             {
                                 value = ParseBlock(ref source, newindent);
+                                nlconsumed = true;
                             }
                             else
                             {
@@ -99,7 +102,7 @@ namespace Devsense.Neon.Parser
                 items.Add(new(key, value));
 
                 // \n
-                if (source.ConsumeNewLine())
+                if (source.ConsumeNewLine() || nlconsumed)
                 {
                     continue;
                 }
