@@ -7,6 +7,9 @@
 		<LangVersion>latest</LangVersion>
 		<Version Condition="'$(Version)' == ''">1.0.0</Version>
 
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)../build/keypair.snk</AssemblyOriginatorKeyFile>
+
 		<!-- prepare for trimming analysis when the library is referenced by a trimmed dotnet application -->
 		<EnableTrimAnalyzer>false</EnableTrimAnalyzer>
 		<IsTrimmable>true</IsTrimmable>
