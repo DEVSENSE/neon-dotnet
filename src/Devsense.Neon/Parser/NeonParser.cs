@@ -67,7 +67,7 @@ namespace Devsense.Neon.Parser
                         if (source.ConsumeNewLine())
                         {
                             var newindent = source.indent;
-                            if (newindent.StartsWith(baseindent))
+                            if (newindent.StartsWith(baseindent) && newindent.Length > baseindent.Length)
                             {
                                 value = ParseBlock(ref source, newindent);
                                 nlconsumed = true;

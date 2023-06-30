@@ -14,6 +14,15 @@ person:
 	name: Homer  	  # this is a comment
 	hasHair: No       # (bool)false
 ", "person.name", "Homer")]
+        [InlineData(@"
+includes:
+#    - phpstan.neon.dist
+
+
+parameters:
+    typeAliases:
+        Name: 'string'
+", "parameters.typeAliases.Name", "string")]
         public void Parse(string neonContent, string path, string expectedValue)
         {
             var root = NeonParser.Parse(neonContent.AsSpan());
