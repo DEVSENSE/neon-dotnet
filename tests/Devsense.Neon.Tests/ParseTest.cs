@@ -62,6 +62,23 @@ parameters:
     parallel:
         maximumNumberOfProcesses: 1
 ")]
+		[InlineData(@"
+parameters:
+    checkMissingIterableValueType: false
+
+    ignoreErrors:
+        - '#Call to an undefined method DateTimeInterface::add\(\)#'
+        - '#Call to an undefined method DateTimeInterface::modify\(\)#'
+        - '#Call to an undefined method DateTimeInterface::setDate\(\)#'
+        - '#Call to an undefined method DateTimeInterface::setTime\(\)#'
+        - '#Call to an undefined method DateTimeInterface::setTimezone\(\)#'
+        - '#Call to an undefined method DateTimeInterface::sub\(\)#'
+
+    level: max
+
+    paths:
+        - src/
+")]
         public void Parse(string neonContent)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());

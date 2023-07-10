@@ -40,14 +40,14 @@ namespace Devsense.Neon.Parser
                     break;
                 }
 
-                if (source.indent.Equals(baseindent, StringComparison.Ordinal) == false)
-                {
-                    break;
-                }
-
                 if (source.ConsumeNewLine())
                 {
                     continue;
+                }
+
+                if (source.indent.Equals(baseindent, StringComparison.Ordinal) == false)
+                {
+                    break;
                 }
 
                 var nlconsumed = false;
