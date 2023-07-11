@@ -66,6 +66,8 @@ namespace Devsense.Neon.Parser
                     {
                         if (source.ConsumeNewLine())
                         {
+                            while (source.ConsumeNewLine()) ; // ignore empty lines
+
                             var newindent = source.indent;
                             if (newindent.StartsWith(baseindent) && newindent.Length > baseindent.Length)
                             {

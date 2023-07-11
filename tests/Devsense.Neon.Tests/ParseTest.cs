@@ -79,6 +79,43 @@ parameters:
     paths:
         - src/
 ")]
+        [InlineData(@"
+parameters:
+    level: 9
+    checkGenericClassInNonGenericObjectType: false
+    paths:
+        - gs-product-configurator.php
+        - class-gs-product-configurator.php
+        - includes/
+    scanDirectories:
+      - ../gravityforms
+      - ../woocommerce
+    excludePaths:
+      analyse:
+        - includes/third-party
+    ignoreErrors:
+      # gf_apply_filters only specifies two params.
+      - '#Function gf_apply_filters invoked with \d+ parameters, 2 required.#'
+    typeAliases:
+      GFFeed: '''
+        array{
+          id: int,
+          form_id: int,
+          meta: array<string, mixed>,
+          is_active: 0|1,
+          addon_slug: string,
+        }
+      '''
+      GSPCFeed: '''
+        GFFeed & array{
+          meta: array<string, mixed> & array{
+            display_price: string,
+            item_meta_display: string,
+            item_meta_display_template: string,
+          },
+        }
+      '''
+")]
         public void Parse(string neonContent)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());

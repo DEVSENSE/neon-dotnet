@@ -222,19 +222,16 @@ namespace Devsense.Neon.Parser
 
                 if (TryConsumeNewLine(source.Slice(n), out newline))
                 {
-                    // \n\s*'''\s*\n
+                    // \n\s*'''
                     int end = n + newline;
                     TryConsumeWhitespace(source.Slice(end), out var ws); end += ws; // \s*
                     if (source.Slice(end).StartsWith(closing.AsSpan(), StringComparison.Ordinal)) // '''
                     {
                         end += closing.Length;
-                        TryConsumeWhitespace(source.Slice(end), out ws); end += ws; // \s*
-                        if (end == source.Length || TryConsumeNewLine(source.Slice(end), out _))
-                        {
-                            charsCount = n + newline + closing.Length;
-                            value = sb.ToString();
-                            return true;
-                        }
+
+                        charsCount = end;
+                        value = sb.ToString();
+                        return true;
                     }
 
                     // \n
