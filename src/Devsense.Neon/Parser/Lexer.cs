@@ -117,7 +117,7 @@ namespace Devsense.Neon.Parser
         static bool ConsumeEscapedSequence(ReadOnlySpan<char> source, StringBuilder result, out int charsCount)
         {
             Debug.Assert(source.Length != 0);
-            
+
             if (source.Length >= 2 && source[0] == '\\')
             {
                 // \t \n \r \f \b \" \\ \/ \_
@@ -201,10 +201,10 @@ namespace Devsense.Neon.Parser
             Debug.Assert(quote == source[2]);
 
             var closing = quote == '\"' ? "\"\"\"" : "'''";
+            int n = closing.Length;
 
-            int n = 3;
 
-            if (TryConsumeNewLine(source.Slice(3), out var newline))
+            if (TryConsumeNewLine(source.Slice(n), out var newline))
             {
                 n += newline;
             }
@@ -215,6 +215,7 @@ namespace Devsense.Neon.Parser
             }
 
             var sb = new StringBuilder();
+            var linestarts = new List<int>() { 0 }; // remember beginnings of line in {sb}
 
             while (n < source.Length)
             {
@@ -228,8 +229,22 @@ namespace Devsense.Neon.Parser
                     if (source.Slice(end).StartsWith(closing.AsSpan(), StringComparison.Ordinal)) // '''
                     {
                         end += closing.Length;
-
                         charsCount = end;
+
+                        // trim indentation within {sb}
+                        var indentation = ReadOnlySpan<char>.Empty;
+                        for (int line = 0; line < linestarts.Count; line++)
+                        {
+                            var lineindent = sb.SubStringOfAny(linestarts[line], " \t".AsSpan()).AsSpan();
+                            indentation = line > 0 ? StringUtils.CommonPrefix(indentation, lineindent) : lineindent;
+                            if (indentation.IsEmpty) break;
+                        }
+                        for (int line = linestarts.Count - 1; line >= 0; line--)
+                        {
+                            sb.Remove(linestarts[line], indentation.Length);
+                        }
+
+                        //
                         value = sb.ToString();
                         return true;
                     }
@@ -237,6 +252,7 @@ namespace Devsense.Neon.Parser
                     // \n
                     sb.Append('\n');
                     n += newline;
+                    linestarts.Add(sb.Length);
                     continue;
                 }
                 else if (c == '\\' && quote == '\"' && n + 1 < source.Length)

@@ -53,5 +53,44 @@ namespace Devsense.Neon
             '{' => '}',
             _ => throw new ArgumentException()
         };
+
+        public static string SubStringOfAny(this StringBuilder sb, int from, ReadOnlySpan<char> any)
+        {
+            if (from >= sb.Length || any.IsEmpty)
+            {
+                return string.Empty;
+            }
+
+            if (from < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            int end = from;
+            for (; end < sb.Length; end++)
+            {
+                if (any.IndexOf(sb[end]) < 0)
+                {
+                    break;
+                }
+            }
+
+            //
+            return from < end ? sb.ToString(from, end - from) : string.Empty;
+        }
+
+        public static ReadOnlySpan<char> CommonPrefix(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
+        {
+            int end = 0;
+            for (; end < a.Length && end < b.Length; end++)
+            {
+                if (a[end] != b[end])
+                {
+                    break;
+                }
+            }
+
+            return a.Slice(0, end);
+        }
     }
 }
