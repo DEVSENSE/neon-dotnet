@@ -56,7 +56,7 @@ namespace Devsense.Neon.Parser
                 {
                     // list
                     key = LiteralFactory.Create(index++);
-                    value = ParseValue(ref source);
+                    value = ParseKeyedValue(ref source, baseindent, out nlconsumed);
                 }
                 else
                 {
@@ -64,26 +64,7 @@ namespace Devsense.Neon.Parser
 
                     if (source.Consume(':'))
                     {
-                        if (source.ConsumeNewLine())
-                        {
-                            while (source.ConsumeNewLine()) ; // ignore empty lines
-
-                            var newindent = source.indent;
-                            if (newindent.StartsWith(baseindent) && newindent.Length > baseindent.Length)
-                            {
-                                value = ParseBlock(ref source, newindent);
-                                nlconsumed = true;
-                            }
-                            else
-                            {
-                                items.Add(new(key, LiteralFactory.Null()));
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            value = ParseValue(ref source);
-                        }
+                        value = ParseKeyedValue(ref source, baseindent, out nlconsumed);
                     }
                     else if (source.Consume('='))
                     {
@@ -116,6 +97,38 @@ namespace Devsense.Neon.Parser
 
             //
             return new Block(items.ToArray());
+        }
+
+        /// <summary>Parse value after <c>:</c> or <c>-</c>.</summary>
+        static INeonValue ParseKeyedValue(ref Tokenizer source, ReadOnlySpan<char> baseindent, out bool nlconsumed)
+        {
+            INeonValue value;
+
+            nlconsumed = false;
+
+            if (source.ConsumeNewLine())
+            {
+                while (source.ConsumeNewLine()) ; // ignore empty lines
+
+                var newindent = source.indent;
+                if (newindent.StartsWith(baseindent) && newindent.Length > baseindent.Length)
+                {
+                    value = ParseBlock(ref source, newindent);
+                    nlconsumed = true;
+                }
+                else
+                {
+                    value = LiteralFactory.Null();
+                    nlconsumed = true;
+                }
+            }
+            else
+            {
+                value = ParseValue(ref source);
+            }
+
+            //
+            return value;
         }
 
         static INeonValue ParseValue(ref Tokenizer source)
