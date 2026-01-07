@@ -183,6 +183,19 @@ parameters:
               b: 2
             - c
             """)]
+        [InlineData(@"parameters:
+  reportUnmatchedIgnoredErrors: false
+  scanDirectories:
+    - ../../../../vendor/drush/drush/src-symfony-compatibility
+  ignoreErrors:
+    - identifier: missingType.iterableValue
+    - identifier: missingType.generics
+    - '#^Call to method Drupal\\Core\\Entity\\Query\\QueryInterface::accessCheck\(\) with false will always evaluate to true.#'
+    - '#^Trait Drupal\\eca\\Hook\\ConfigSchemaHooksTrait is used zero times and is not analysed.#'
+  excludePaths:
+    - '*/tests/*.php'
+
+")]
         public void Parse(string neonContent)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());

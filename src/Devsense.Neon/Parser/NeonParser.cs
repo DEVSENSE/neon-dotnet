@@ -57,6 +57,15 @@ namespace Devsense.Neon.Parser
                     // list
                     key = LiteralFactory.Create(index++);
                     value = ParseKeyedValue(ref source, baseindent, out nlconsumed);
+
+                    // - literal:
+                    if (nlconsumed == false && value is INeonLiteral && source.Consume(':'))
+                    {
+                        value = new Block(new KeyValuePair<INeonValue, INeonValue>[]
+                        {
+                            new(value, ParseKeyedValue(ref source, baseindent, out nlconsumed))
+                        });
+                    }
                 }
                 else
                 {
