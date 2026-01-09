@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Devsense.Neon.Parser;
 using Xunit;
 
@@ -196,6 +197,11 @@ parameters:
     - '*/tests/*.php'
 
 ")]
+        [InlineData(@"
+parametersSchema:
+	mockery: structure([
+		convertUnionToIntersectionType: bool()
+	])")]
         public void Parse(string neonContent)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());

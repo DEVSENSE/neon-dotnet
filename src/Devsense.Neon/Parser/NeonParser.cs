@@ -196,6 +196,7 @@ namespace Devsense.Neon.Parser
 
             for (; ; )
             {
+                // ignore EOL
                 while (source.ConsumeNewLine()) ;
 
                 // )
@@ -225,6 +226,9 @@ namespace Devsense.Neon.Parser
                 {
                     continue;
                 }
+
+                // ignore EOL
+                while (source.ConsumeNewLine()) ;
 
                 // )
                 if (source.Consume(closing))
