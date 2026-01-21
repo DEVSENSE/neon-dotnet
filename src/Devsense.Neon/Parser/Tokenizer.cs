@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Devsense.Neon.Parser
@@ -15,7 +16,7 @@ namespace Devsense.Neon.Parser
         public int line => tokens.Line;
 
         public Exception Unexpected() => new NeonParseException(
-            $"Unexpected token {Fetch().Type} \"{Fetch().Value.ToString()}\" at line {this.line}.",
+            $"Unexpected token {Fetch().Type} \"{Fetch().Value.ToString()}\" at line {this.tokens.Line}, column {this.tokens.Column}.",
             this.line
         );
 
@@ -24,7 +25,7 @@ namespace Devsense.Neon.Parser
             this.tokens = lexer.GetEnumerator();
         }
 
-        Token CreateEOF() => new Token(ReadOnlySpan<char>.Empty, NeonTokens.EOF, tokens.Line);
+        Token CreateEOF() => new Token(ReadOnlySpan<char>.Empty, NeonTokens.EOF, tokens.Line, tokens.Column);
 
         public Token Fetch()
         {
@@ -88,6 +89,8 @@ namespace Devsense.Neon.Parser
 
         public bool Consume(NeonTokens type, out Token token)
         {
+            Debug.Assert(type != NeonTokens.Whitespace);
+
             token = Fetch();
 
             if (token.Type == type)
