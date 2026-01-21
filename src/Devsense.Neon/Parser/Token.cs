@@ -12,6 +12,8 @@ namespace Devsense.Neon.Parser
 
         public int Line { get; }
 
+        public int Column { get; }
+
         public bool Is(char c) => Type == NeonTokens.Char && Value.Length == 1 && Value[0] == c;
 
         public bool IsChar(out char c)
@@ -26,11 +28,12 @@ namespace Devsense.Neon.Parser
             return false;
         }
 
-        public Token(ReadOnlySpan<char> value, NeonTokens type, int line)
+        public Token(ReadOnlySpan<char> value, NeonTokens type, int line, int col)
         {
             Value = value;
             Type = type;
             Line = line;
+            Column = col;
         }
     }
 }

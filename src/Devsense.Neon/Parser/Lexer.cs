@@ -283,6 +283,8 @@ namespace Devsense.Neon.Parser
 
             public int Line { get; private set; }
 
+            public int Column { get; private set; }
+
             public TokenEnumerator(ReadOnlySpan<char> source)
             {
                 this.source = source;
@@ -295,8 +297,26 @@ namespace Devsense.Neon.Parser
             {
                 Debug.Assert(nchars >= 0);
 
-                Current = new Token(value != null ? value.AsSpan() : source.Slice(0, nchars), type, Line);
+                Current = new Token(
+                    value != null ? value.AsSpan() : source.Slice(0, nchars),
+                    type,
+                    Line,
+                    Column
+                );
+
                 source = source.Slice(nchars);
+
+                //
+                if (type == NeonTokens.Newline)
+                {
+                    Column = 0;
+                }
+                else
+                {
+                    Column += nchars;
+                }
+
+                //
                 return nchars > 0;
             }
 
