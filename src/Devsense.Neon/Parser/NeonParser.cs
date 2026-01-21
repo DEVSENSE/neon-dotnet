@@ -111,8 +111,6 @@ namespace Devsense.Neon.Parser
         /// <summary>Parse value after <c>:</c> or <c>-</c>.</summary>
         static INeonValue ParseKeyedValue(ref Tokenizer source, ReadOnlySpan<char> baseindent, out bool nlconsumed)
         {
-            INeonValue value;
-
             nlconsumed = false;
 
             if (source.ConsumeNewLine())
@@ -122,22 +120,19 @@ namespace Devsense.Neon.Parser
                 var newindent = source.indent;
                 if (newindent.StartsWith(baseindent) && newindent.Length > baseindent.Length)
                 {
-                    value = ParseBlock(ref source, newindent);
                     nlconsumed = true;
+                    return ParseBlock(ref source, newindent);
                 }
                 else
                 {
-                    value = LiteralFactory.Null();
                     nlconsumed = true;
+                    return LiteralFactory.Null();
                 }
             }
             else
             {
-                value = ParseValue(ref source);
+                return ParseValue(ref source);
             }
-
-            //
-            return value;
         }
 
         static INeonValue ParseValue(ref Tokenizer source)

@@ -11,7 +11,7 @@ namespace Devsense.Neon
         /// </summary>
         public int Line { get; set; }
 
-        public NeonParseException(string message, int line)
+        public NeonParseException(string message, int line) : base(message)
         {
             this.Line = line;
         }

@@ -14,7 +14,10 @@ namespace Devsense.Neon.Parser
 
         public int line => tokens.Line;
 
-        public Exception Unexpected() => new NeonParseException("Unexpected", this.line);
+        public Exception Unexpected() => new NeonParseException(
+            $"Unexpected token {Fetch().Type} \"{Fetch().Value.ToString()}\" at line {this.line}.",
+            this.line
+        );
 
         public Tokenizer(Lexer lexer)
         {
