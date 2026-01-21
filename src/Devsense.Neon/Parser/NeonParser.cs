@@ -30,6 +30,7 @@ namespace Devsense.Neon.Parser
         {
             var index = 0L;
             var items = new List<KeyValuePair<INeonValue, INeonValue>>();
+            var baseindent_alt = baseindent; // alternative {baseindent} without the leading '-'
 
             for (; ; )
             {
@@ -45,15 +46,34 @@ namespace Devsense.Neon.Parser
                     continue;
                 }
 
+                var allow_dash = true;
+
                 if (source.indent.Equals(baseindent, StringComparison.Ordinal) == false)
                 {
-                    break;
+                    if (source.indent.Equals(baseindent_alt, StringComparison.Ordinal))
+                    {
+                        // indentation matches the indent without `-`
+                        allow_dash = false;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
 
                 var nlconsumed = false;
 
-                if (source.Consume('-'))
+                if (allow_dash && source.Consume('-'))
                 {
+                    // Fix for #992
+                    var line = source.line;
+                    var next = source.Fetch();
+                    if (next.Line == line && next.Type != NeonTokens.Newline && next.Column > source.indent.Length)
+                    {
+                        // remember possible indentation without the leading `-`
+                        baseindent_alt = $"{source.indent.ToString()}{new string(' ', next.Column - source.indent.Length)}".AsSpan();
+                    }
+
                     // list
                     key = LiteralFactory.Create(index++);
                     value = ParseKeyedValue(ref source, baseindent, out nlconsumed);

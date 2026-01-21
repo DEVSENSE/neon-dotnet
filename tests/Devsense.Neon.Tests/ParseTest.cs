@@ -201,7 +201,17 @@ parameters:
 parametersSchema:
 	mockery: structure([
 		convertUnionToIntersectionType: bool()
-	])")]
+	])
+")]
+        [InlineData(@"
+#992
+parameters:
+  ignoreErrors:
+    - messages:
+        - foo
+      paths:
+        - bar
+")]
         public void Parse(string neonContent)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());
