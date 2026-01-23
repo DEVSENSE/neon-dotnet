@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.Json;
 using Devsense.Neon.Parser;
 using Xunit;
 
@@ -63,7 +64,19 @@ parameters:
     parallel:
         maximumNumberOfProcesses: 1
 ")]
-		[InlineData(@"
+        [InlineData(@"
+includes:
+    - phpstan.neon.dist
+
+parameters:
+    typeAliases:
+        Name: 'string'
+", @"{
+    ""includes"": [ ""phpstan.neon.dist"" ],
+    ""parameters"": { ""typeAliases"": { ""Name"": ""string"" } }
+}
+")]
+        [InlineData(@"
 parameters:
     checkMissingIterableValueType: false
 
@@ -183,7 +196,11 @@ parameters:
               a: 1
               b: 2
             - c
-            """)]
+            """, @"
+[
+    {""a"": 1, ""b"": 2},
+    ""c""
+]")]
         [InlineData(@"parameters:
   reportUnmatchedIgnoredErrors: false
   scanDirectories:
@@ -211,10 +228,43 @@ parameters:
         - foo
       paths:
         - bar
+    - 
+      messages:
+        - foo
+      paths:
+        - bar
 ")]
-        public void Parse(string neonContent)
+        [InlineData(@"
+block:
+  -
+    messages:
+      - foo1
+    paths:
+      - bar1
+  - 
+    messages:
+      - foo2
+    paths:
+      - bar2
+", @"
+{""block"":
+    [
+        {""messages"":[""foo1""], ""paths"":[""bar1""]},
+        {""messages"":[""foo2""], ""paths"":[""bar2""]}
+    ]}
+")]
+        public void Parse(string neonContent, string? expectedJson = null)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());
+
+            if (expectedJson != null)
+            {
+                var json = NeonToJson.Serialize(value);
+                var expectedSanitized = expectedJson.ReplaceLineEndings("").Replace(" ", "");
+
+                //JsonSerializer.Deserialize<JsonElement>(expectedJson)
+                Assert.Equal(expectedSanitized, json);
+            }
         }
     }
 }
