@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using Devsense.Neon.Parser;
 using Devsense.Neon.Visitor;
@@ -13,6 +14,13 @@ namespace Devsense.Neon.Model
     public interface INeonLiteral : INeonValue
     {
         object? Value { get; }
+
+        Type Type { get; }
+
+        /// <summary>
+        /// Gets value as string. Cannot be <c>null</c>.
+        /// </summary>
+        string ToString();
     }
 
     class LiteralFactory
@@ -60,6 +68,18 @@ namespace Devsense.Neon.Model
             // 0b11010    # binary number
             // 0o666      # octal number
             // 0x7A       # hexa number
+            if (long.TryParse(
+#if NET5_0_OR_GREATER
+                literal,
+#else
+                literal.ToString(),
+#endif
+
+                NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var longvalue))
+            {
+                return Create(longvalue);
+            }
+            // TODO: number styles
 
             // dates:
             // 2016-06-03                  # date
@@ -78,6 +98,8 @@ namespace Devsense.Neon.Model
     [DebuggerDisplay("{Value,nq}")]
     class Literal<T> : INeonLiteral
     {
+        Type INeonLiteral.Type => typeof(T);
+
         object? INeonLiteral.Value => Value;
 
         public T? Value { get; }
@@ -88,5 +110,26 @@ namespace Devsense.Neon.Model
         }
 
         public void Visit(NeonValueVisitor visitor) => visitor.Visit(this);
+
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(object))
+            {
+                if (ReferenceEquals(Value, null)) return "null";
+            }
+
+            if (typeof(T) == typeof(bool) && Value is bool b)
+            {
+                return b ? "true" : "false";
+            }
+
+            if (typeof(T) == typeof(string) && Value is string s)
+            {
+                return s;
+            }
+
+            //
+            return Value?.ToString() ?? string.Empty;
+        }
     }
 }
