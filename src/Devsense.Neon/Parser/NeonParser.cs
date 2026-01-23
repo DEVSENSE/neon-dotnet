@@ -26,11 +26,11 @@ namespace Devsense.Neon.Parser
         }
 
         // parse content on new line after ':'
-        static INeonValue ParseBlock(ref Tokenizer source, ReadOnlySpan<char> baseindent)
+        static INeonValue ParseBlock(ref Tokenizer source, int baseindent)
         {
             var index = 0L;
             var items = new List<KeyValuePair<INeonValue, INeonValue>>();
-            var baseindent_alt = baseindent; // alternative {baseindent} without the leading '-'
+            var is_list = false;
 
             for (; ; )
             {
@@ -46,46 +46,27 @@ namespace Devsense.Neon.Parser
                     continue;
                 }
 
-                var allow_dash = true;
-
-                if (source.indent.Equals(baseindent, StringComparison.Ordinal) == false)
+                if  (source.column != baseindent) //(source.indent.Equals(baseindent, StringComparison.Ordinal) == false)
                 {
-                    if (source.indent.Equals(baseindent_alt, StringComparison.Ordinal))
-                    {
-                        // indentation matches the indent without `-`
-                        allow_dash = false;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    break;
                 }
 
-                var nlconsumed = false;
+                var linefrom = source.line;
 
-                if (allow_dash && source.Consume('-'))
+                if (source.Consume('-'))
                 {
-                    // Fix for #992
-                    var line = source.line;
-                    var next = source.Fetch();
-                    if (next.Line == line && next.Type != NeonTokens.Newline && next.Column > source.indent.Length)
+                    if (items.Count == 0)
                     {
-                        // remember possible indentation without the leading `-`
-                        baseindent_alt = $"{source.indent.ToString()}{new string(' ', next.Column - source.indent.Length)}".AsSpan();
+                        is_list = true;
+                    }
+                    else if (is_list == false)
+                    {
+                        break;
                     }
 
                     // list
                     key = LiteralFactory.Create(index++);
-                    value = ParseKeyedValue(ref source, baseindent, out nlconsumed);
-
-                    // - literal:
-                    if (nlconsumed == false && value is INeonLiteral && source.Consume(':'))
-                    {
-                        value = new Block(new KeyValuePair<INeonValue, INeonValue>[]
-                        {
-                            new(value, ParseKeyedValue(ref source, baseindent, out nlconsumed))
-                        });
-                    }
+                    value = ParseKeyedValue(ref source, baseindent);
                 }
                 else
                 {
@@ -93,7 +74,7 @@ namespace Devsense.Neon.Parser
 
                     if (source.Consume(':'))
                     {
-                        value = ParseKeyedValue(ref source, baseindent, out nlconsumed);
+                        value = ParseKeyedValue(ref source, baseindent);
                     }
                     else if (source.Consume('='))
                     {
@@ -114,7 +95,7 @@ namespace Devsense.Neon.Parser
                 items.Add(new(key, value));
 
                 // \n
-                if (source.ConsumeNewLine() || nlconsumed)
+                if (source.ConsumeNewLine() || source.line > linefrom)
                 {
                     continue;
                 }
@@ -129,29 +110,22 @@ namespace Devsense.Neon.Parser
         }
 
         /// <summary>Parse value after <c>:</c> or <c>-</c>.</summary>
-        static INeonValue ParseKeyedValue(ref Tokenizer source, ReadOnlySpan<char> baseindent, out bool nlconsumed)
+        static INeonValue ParseKeyedValue(ref Tokenizer source, int minindent)
         {
-            nlconsumed = false;
+            var linefrom = source.line;
 
-            if (source.ConsumeNewLine())
+            while (source.ConsumeNewLine()) ; // ignore empty lines
+
+            var newindent = source.column;
+            if (newindent > minindent) // (newindent.StartsWith(minindent) && newindent.Length > minindent.Length)
             {
-                while (source.ConsumeNewLine()) ; // ignore empty lines
-
-                var newindent = source.indent;
-                if (newindent.StartsWith(baseindent) && newindent.Length > baseindent.Length)
-                {
-                    nlconsumed = true;
-                    return ParseBlock(ref source, newindent);
-                }
-                else
-                {
-                    nlconsumed = true;
-                    return LiteralFactory.Null();
-                }
+                //nlconsumed = true;
+                return ParseBlock(ref source, newindent);
             }
             else
             {
-                return ParseValue(ref source);
+                //snlconsumed = true;
+                return LiteralFactory.Null();
             }
         }
 
@@ -195,7 +169,7 @@ namespace Devsense.Neon.Parser
             var entity = source.Consume('(')
                 ? new Entity(value, ParseBraces(ref source, ')'))
                 : new Entity(value);
-              
+
             // chained entity?
             if (source.Consume(NeonTokens.Literal, out var entityLit))
             {

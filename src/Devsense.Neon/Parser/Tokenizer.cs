@@ -11,9 +11,11 @@ namespace Devsense.Neon.Parser
 
         Token fetch;
 
-        public ReadOnlySpan<char> indent;
+        public int indent => column;
 
-        public int line => tokens.Line;
+        public int column => Fetch().Column;
+
+        public int line => Fetch().Line;
 
         public Exception Unexpected() => new NeonParseException(
             $"Unexpected token {Fetch().Type} \"{Fetch().Value.ToString()}\" at line {this.tokens.Line}, column {this.tokens.Column}.",
@@ -45,13 +47,13 @@ namespace Devsense.Neon.Parser
 
                     if (fetch.Type == NeonTokens.Newline)
                     {
-                        indent = ReadOnlySpan<char>.Empty;
+                        //indent = ReadOnlySpan<char>.Empty;
                     }
                     else if (fetch.Type == NeonTokens.Whitespace)
                     {
                         if (prev == NeonTokens.Newline)
                         {
-                            indent = fetch.Value;
+                            //indent = fetch.Value;
                         }
                         continue;
                     }
