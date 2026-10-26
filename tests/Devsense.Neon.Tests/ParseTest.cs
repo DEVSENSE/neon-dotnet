@@ -49,7 +49,7 @@ special types:
 	date: 2020-02-02
 	date time: 2020-02-02 12:34:56
 ")]
-		[InlineData(@"
+        [InlineData(@"
 includes:
     - phpstan.neon.dist
 
@@ -253,6 +253,11 @@ block:
         {""messages"":[""foo2""], ""paths"":[""bar2""]}
     ]}
 ")]
+        [InlineData(@"
+message: '""\."" between ''mode''.'", @"
+{
+  ""message"": ""\u0022\\.\u0022 between \u0027mode\u0027.""
+}")]
         public void Parse(string neonContent, string? expectedJson = null)
         {
             var value = NeonParser.Parse(neonContent.AsSpan());
@@ -260,11 +265,12 @@ block:
             if (expectedJson != null)
             {
                 var json = NeonToJson.Serialize(value);
-                var expectedSanitized = expectedJson.ReplaceLineEndings("").Replace(" ", "");
 
                 //JsonSerializer.Deserialize<JsonElement>(expectedJson)
-                Assert.Equal(expectedSanitized, json);
+                Assert.Equal(Sanitize(expectedJson), Sanitize(json));
             }
         }
+
+        static string Sanitize(string json) => json.ReplaceLineEndings("").Replace(" ", "");
     }
 }

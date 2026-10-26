@@ -170,10 +170,20 @@ namespace Devsense.Neon.Parser
                 }
                 else if (c == quote)
                 {
-                    // done
-                    charsCount = n + 1;
-                    value = sb.ToString();
-                    return true;
+                    if (n + 1 < source.Length && source[n + 1] == quote)
+                    {
+                        // "" -> "
+                        // '' -> '
+                        n++;
+                        // continue to Append(c) ...
+                    }
+                    else
+                    {
+                        // done
+                        charsCount = n + 1;
+                        value = sb.ToString();
+                        return true;
+                    }
                 }
 
                 // continue
